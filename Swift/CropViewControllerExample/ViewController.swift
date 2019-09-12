@@ -22,6 +22,11 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
         guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
         
         let cropController = CropViewController(croppingStyle: croppingStyle, image: image)
+        
+        cropController.aspectRatioLockDimensionSwapEnabled = false
+        cropController.aspectRatioLockEnabled = true
+        cropController.customAspectRatio = CGSize(width: 16, height: 9)
+        
         cropController.delegate = self
         
         // Uncomment this if you wish to provide extra instructions via a title label
