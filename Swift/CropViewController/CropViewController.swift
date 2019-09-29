@@ -558,7 +558,7 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
 extension CropViewController {
     fileprivate func setUpCropController() {
         addChild(toCropViewController)
-        transitioningDelegate = (toCropViewController as! UIViewControllerTransitioningDelegate)
+//        transitioningDelegate = (toCropViewController as! UIViewControllerTransitioningDelegate)
         toCropViewController.delegate = self
         toCropViewController.didMove(toParent: self)
     }
