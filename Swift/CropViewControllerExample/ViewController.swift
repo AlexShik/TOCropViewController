@@ -29,6 +29,10 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
         
         cropController.delegate = self
         
+        cropController.onDidCropToNormalizedRect = { rect, angle in
+            print("Current rect is: \(rect)")
+        }
+        
         // Uncomment this if you wish to provide extra instructions via a title label
         //cropController.title = "Crop Image"
     

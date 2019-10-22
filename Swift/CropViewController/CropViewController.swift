@@ -323,6 +323,19 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
     }
     
     /**
+     Called when the user has committed the crop action, and provides
+     both the cropped image with crop co-ordinates.
+     
+     @param image The newly cropped image.
+     @param cropRect A rectangle indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
+     @param angle The angle of the image when it was cropped
+     */
+    public var onDidCropToNormalizedRect: ((CGRect, NSInteger) -> (Void))? {
+        set { toCropViewController.onDidCropToNormalizedRect = newValue }
+        get { return toCropViewController.onDidCropToNormalizedRect }
+    }
+    
+    /**
      If the cropping style is set to circular, this block will return a circle-cropped version of the selected
      image, as well as it's cropping co-ordinates
      

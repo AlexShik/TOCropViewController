@@ -967,6 +967,9 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     // Check if non-circular was implemented
     BOOL isDidCropToImageDelegateAvailable = [self.delegate respondsToSelector:@selector(cropViewController:didCropToImage:withRect:angle:)];
     BOOL isDidCropToImageCallbackAvailable = self.onDidCropToRect != nil;
+    // MARK: - FP Customization
+    BOOL isDidCropToNormalizedRectCallbackAvailable = self.onDidCropToNormalizedRect != nil;
+    // MARK: -
 
     //If cropping circular and the circular generation delegate/block is implemented, call it
     if (self.croppingStyle == TOCropViewCroppingStyleCircular && (isCircularImageDelegateAvailable || isCircularImageCallbackAvailable)) {
@@ -984,6 +987,12 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
         
         isCallbackOrDelegateHandled = YES;
     }
+    // MARK: - FP Customization
+    else if (isDidCropToNormalizedRectCallbackAvailable) {
+        [self normalizeRect:cropFrame withAngle:angle];
+    }
+    // MARK: -
+    
     //If the delegate/block that requires the specific cropped image is provided, call it
     else if (isDidCropToImageDelegateAvailable || isDidCropToImageCallbackAvailable) {
         UIImage *image = nil;
@@ -1012,6 +1021,88 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
         [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
     }
 }
+
+// MARK: - FP Customization
+- (void)normalizeRect:(CGRect)cropFrame withAngle:(NSInteger)angle
+{
+    // In the original image's local co-ordinate space
+    CGRect originalCropFrame = CGRectZero;
+    CGPoint originalImageOrigin;
+    CGPoint modifiedCropFrameOrigin;
+    BOOL isValid = YES;
+    
+    switch (angle) {
+        case 0:
+            originalCropFrame = cropFrame;
+            break;
+        case -270:
+        case 90:
+            // We are using inverted axis because image rotated.
+            originalImageOrigin = CGPointMake(self.image.size.height, 0);
+            
+            modifiedCropFrameOrigin = CGPointMake(
+                                                  cropFrame.origin.x + cropFrame.size.width,
+                                                  cropFrame.origin.y
+                                                  );
+            
+            originalCropFrame = CGRectMake(
+                                           fabs(originalImageOrigin.y - modifiedCropFrameOrigin.y),
+                                           fabs(originalImageOrigin.x - modifiedCropFrameOrigin.x),
+                                           cropFrame.size.height,
+                                           cropFrame.size.width
+                                           );
+            break;
+        case -180:
+        case 180:
+            originalImageOrigin = CGPointMake(self.image.size.width, self.image.size.height);
+            
+            modifiedCropFrameOrigin = CGPointMake(
+                                                  cropFrame.origin.x + cropFrame.size.width,
+                                                  cropFrame.origin.y + cropFrame.size.height
+                                                  );
+            
+            originalCropFrame = CGRectMake(
+                                           fabs(originalImageOrigin.x - modifiedCropFrameOrigin.x),
+                                           fabs(originalImageOrigin.y - modifiedCropFrameOrigin.y),
+                                           cropFrame.size.width,
+                                           cropFrame.size.height
+                                           );
+            break;
+        case -90:
+        case 270:
+            // We are using inverted axis because image rotated.
+            originalImageOrigin = CGPointMake(0, self.image.size.width);
+            
+            modifiedCropFrameOrigin = CGPointMake(
+                                                  cropFrame.origin.x,
+                                                  cropFrame.origin.y + cropFrame.size.height
+                                                  );
+            
+            // We are using inverted axis because image rotated.
+            originalCropFrame = CGRectMake(
+                                           fabs(originalImageOrigin.y - modifiedCropFrameOrigin.y),
+                                           fabs(originalImageOrigin.x - modifiedCropFrameOrigin.x),
+                                           cropFrame.size.height,
+                                           cropFrame.size.width
+                                           );
+            break;
+        default:
+            isValid = NO;
+            break;
+    }
+    
+    if (isValid) {
+        CGRect normalizedCropFrame = CGRectMake(
+                                                originalCropFrame.origin.x / self.image.size.width,
+                                                originalCropFrame.origin.y / self.image.size.height,
+                                                originalCropFrame.size.width / self.image.size.width,
+                                                originalCropFrame.size.height / self.image.size.height
+                                                );
+        
+        self.onDidCropToNormalizedRect(normalizedCropFrame, angle);
+    }
+}
+// MARK: -
 
 #pragma mark - Property Methods -
 

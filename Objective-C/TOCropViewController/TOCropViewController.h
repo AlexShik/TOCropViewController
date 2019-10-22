@@ -302,6 +302,18 @@
  */
 @property (nullable, nonatomic, strong) void (^onDidCropToRect)(UIImage* _Nonnull image, CGRect cropRect, NSInteger angle);
 
+// MARK: - FP Customization
+/**
+ Called when the user has committed the crop action, and provides
+ both the cropped image with crop co-ordinates.
+ 
+ @param image The newly cropped image.
+ @param cropRect A normalized rectangle (With values from 0 to 1)  indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
+ @param angle The angle of the image when it was cropped
+ */
+@property (nullable, nonatomic, strong) void (^onDidCropToNormalizedRect)(CGRect cropRect, NSInteger angle);
+// MARK: -
+
 /**
  If the cropping style is set to circular, this block will return a circle-cropped version of the selected
  image, as well as it's cropping co-ordinates
